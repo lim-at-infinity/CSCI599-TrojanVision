@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1719484035058084392}
   - component: {fileID: 8455240873688343599}
   - component: {fileID: 3391186627326296934}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -147,7 +147,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1921358617044356780}
   - component: {fileID: 6007138206206587607}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Content
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -213,9 +213,10 @@ GameObject:
   - component: {fileID: 3445954749988761454}
   - component: {fileID: 1277017914783150035}
   - component: {fileID: 3672506580414761321}
-  - component: {fileID: 2778297290977592991}
   - component: {fileID: 951145797492200862}
-  m_Layer: 5
+  - component: {fileID: 7794461294467609586}
+  - component: {fileID: 3729210140279687071}
+  m_Layer: 3
   m_Name: ProceduresPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -288,25 +289,6 @@ MonoBehaviour:
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 4
   m_PresetInfoIsWorld: 0
---- !u!114 &2778297290977592991
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2292303842414524029}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7951c64acb0fa62458bf30a60089fe2d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.XR.Interaction.Toolkit::UnityEngine.XR.Interaction.Toolkit.UI.TrackedDeviceGraphicRaycaster
-  m_IgnoreReversedGraphics: 0
-  m_CheckFor2DOcclusion: 0
-  m_CheckFor3DOcclusion: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_RaycastTriggerInteraction: 1
 --- !u!114 &951145797492200862
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -325,6 +307,57 @@ MonoBehaviour:
   m_IgnoreX: 0
   m_IgnoreY: 0
   m_IgnoreZ: 0
+--- !u!114 &7794461294467609586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2292303842414524029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee10491ef6d5d1d49a270cf6b09bdc19, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Oculus.VR::OVROverlayCanvas
+  _mipmapMode: 0
+  _dynamicResolution: 1
+  _redrawResolutionThreshold: 2147483647
+  rectTransform: {fileID: 3445954749988761454}
+  maxTextureSize: 2048
+  manualRedraw: 0
+  renderInterval: 1
+  renderIntervalFrameOffset: 0
+  superSample: 0
+  layer: 5
+  opacity: 2
+  shape: 0
+  curveRadius: 1
+  overlapMask: 0
+  compositionMode: 1
+  enable3D: 0
+  depthRange: 0.5
+  _overlayEnabled: 1
+--- !u!114 &3729210140279687071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2292303842414524029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 54013cb594f3d3e48b6e326b14e70b99, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProceduresPanel
+  titleText: {fileID: 1928780302986089433}
+  stepButtons:
+  - {fileID: 6587703793953511896}
+  - {fileID: 1460116144202311284}
+  - {fileID: 7060316716630088210}
+  steps:
+  - Step 1 - placeholder
+  - Step 2 - placeholder
+  - Step 3 - placeholder
 --- !u!1 &2591776581281730804
 GameObject:
   m_ObjectHideFlags: 0
@@ -336,7 +369,7 @@ GameObject:
   - component: {fileID: 2601667562361956711}
   - component: {fileID: 283650836829807767}
   - component: {fileID: 1928780302986089433}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Title
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -473,7 +506,7 @@ GameObject:
   - component: {fileID: 1611560866573160504}
   - component: {fileID: 1042090873600045704}
   - component: {fileID: 2732425381837488317}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -612,7 +645,7 @@ GameObject:
   - component: {fileID: 4181819964109630370}
   - component: {fileID: 6587703793953511896}
   - component: {fileID: 8114359824153637838}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Step 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -754,7 +787,7 @@ GameObject:
   - component: {fileID: 3550768970525148303}
   - component: {fileID: 7060316716630088210}
   - component: {fileID: 1139688677560456281}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Step 3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -894,7 +927,7 @@ GameObject:
   - component: {fileID: 1148453232825883098}
   - component: {fileID: 1930495030106205159}
   - component: {fileID: 6943705283057883250}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1031,7 +1064,7 @@ GameObject:
   - component: {fileID: 5457404927448655889}
   - component: {fileID: 7792479533373662741}
   - component: {fileID: 5001284769263829731}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1110,7 +1143,7 @@ GameObject:
   - component: {fileID: 1672576548472929328}
   - component: {fileID: 1460116144202311284}
   - component: {fileID: 1085797377866086936}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Step 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}

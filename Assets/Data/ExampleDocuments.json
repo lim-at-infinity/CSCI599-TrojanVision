@@ -1,0 +1,8 @@
+{
+  "documents": [
+    { "name": "Brake Service Manual", "type": "pdf", "url": "" },
+    { "name": "Torque Spec Sheet", "type": "pdf", "url": "" },
+    { "name": "Caliper Diagram", "type": "image", "url": "" },
+    { "name": "Pad Replacement Video", "type": "video", "url": "" }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "title": "Front Brake Pad Replacement",
+  "steps": [
+    { "text": "Loosen the lug nuts" },
+    { "text": "Lift the car and set a jack stand" },
+    { "text": "Remove the wheel" },
+    { "text": "Remove the caliper bolts" },
+    { "text": "Swap the brake pads" }
+  ]
+}
