@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
-
+using UnityEngine.Video;
 // =====================================================================================
 // DocumentsPanel  (STUB - attached to the RIGHT hand)
 //
@@ -64,7 +64,9 @@ public class DocumentsPanel : MonoBehaviour
     // The button that gets copied for each document when data is loaded.
     // Leave empty to copy the first default button (Document 1).
     public Button documentButtonTemplate;
-
+    // NEW: Center popup and its video player.
+    public GameObject videoPopup;
+    public VideoPlayer popupVideoPlayer;
     // The document buttons currently on screen (either the default ones or ones made from data).
     private List<Button> documentButtons = new List<Button>();
 
@@ -171,6 +173,31 @@ public class DocumentsPanel : MonoBehaviour
         DocumentData document = documents[documentNumber];
         Debug.Log("Documents: opened " + document.name + " (type: " + document.type + ")");
         // TODO: hide the grid and show the document (PDF page, image, video, or 3D model) based on document.type.
+        if (document.type == "video")
+        {
+        if (videoPopup == null || popupVideoPlayer == null)
+        {
+            Debug.LogWarning("Please assign Video Popup and Popup Video Player.");
+            return;
+        }
+
+        videoPopup.SetActive(true);
+        popupVideoPlayer.Stop();
+            popupVideoPlayer.Play();
+    }
+    else
+    {
+    // NEW: Stop any video when another document is selected.
+    if (popupVideoPlayer != null)
+    {
+        popupVideoPlayer.Stop();
+    }
+
+    if (videoPopup != null)
+    {
+        videoPopup.SetActive(false);
+    }
+}
     }
 
     // Close the open document and go back to the grid.
@@ -179,6 +206,16 @@ public class DocumentsPanel : MonoBehaviour
         Debug.Log("Documents: closed document " + openDocument);
         openDocument = -1;
         // TODO: hide the document and show the grid again.
+        // NEW: Stop playback and hide the center popup.
+    if (popupVideoPlayer != null)
+    {
+        popupVideoPlayer.Stop();
+    }
+
+    if (videoPopup != null)
+    {
+        videoPopup.SetActive(false);
+    }
     }
 
     // Show the whole panel.
