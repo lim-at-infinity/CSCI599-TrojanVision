@@ -211,6 +211,9 @@ GameObject:
   - component: {fileID: 6351514799196918118}
   - component: {fileID: 7702358633916531339}
   - component: {fileID: 1405033475333493352}
+  - component: {fileID: 7524367855775788751}
+  - component: {fileID: 4058882433749852758}
+  - component: {fileID: 2785819708356073637}
   m_Layer: 5
   m_Name: DocumentsPanel
   m_TagString: Untagged
@@ -321,6 +324,65 @@ MonoBehaviour:
   m_IgnoreX: 0
   m_IgnoreY: 0
   m_IgnoreZ: 0
+--- !u!114 &7524367855775788751
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3229179581174592470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f8df650711e014469ea511c1fa14249, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DocumentsPanel
+  titleText: {fileID: 1720594895535854324}
+  contentArea: {fileID: 8708939625703962607}
+  defaultDocumentButtons:
+  - {fileID: 5647255922653974127}
+  - {fileID: 4596070085291842357}
+  - {fileID: 146211359973442901}
+  title: Documents
+  defaultDocumentNames:
+  - Document 1
+  - Document 2
+  - Document 3
+  documentDataFile: {fileID: 0}
+  documentButtonTemplate: {fileID: 0}
+--- !u!114 &4058882433749852758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3229179581174592470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+--- !u!114 &2785819708356073637
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3229179581174592470}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
+  m_IgnoreReversedGraphics: 1
+  m_BlockingObjects: 0
+  m_BlockingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!1 &3579633949588786209
 GameObject:
   m_ObjectHideFlags: 0

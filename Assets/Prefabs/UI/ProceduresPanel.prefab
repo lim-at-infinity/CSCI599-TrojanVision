@@ -350,14 +350,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProceduresPanel
   titleText: {fileID: 1928780302986089433}
-  stepButtons:
+  contentArea: {fileID: 1921358617044356780}
+  defaultStepButtons:
   - {fileID: 6587703793953511896}
   - {fileID: 1460116144202311284}
   - {fileID: 7060316716630088210}
-  steps:
+  defaultTitle: Procedures
+  defaultSteps:
   - Step 1 - placeholder
   - Step 2 - placeholder
   - Step 3 - placeholder
+  procedureDataFile: {fileID: 0}
+  stepButtonTemplate: {fileID: 0}
 --- !u!1 &2591776581281730804
 GameObject:
   m_ObjectHideFlags: 0
