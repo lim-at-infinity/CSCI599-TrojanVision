@@ -41,7 +41,7 @@ public class ProceduresPanel : MonoBehaviour
     // The "Content" object that holds the step buttons (drag Background/Content here).
     public Transform contentArea;
 
-    // The step buttons that are already in the prefab (drag Step 1, Step 2, Step 3 here, in order).
+    // The step buttons that are already in the prefab (drag Step 1, Step 2, 3 here, in order).
     // These are shown when there is no data.
     // ([FormerlySerializedAs] keeps what you already dragged in when this was called "stepButtons".)
     [FormerlySerializedAs("stepButtons")]
@@ -71,8 +71,19 @@ public class ProceduresPanel : MonoBehaviour
     // The text of each step currently on screen.
     private List<string> stepTexts = new List<string>();
 
-    // Which step the user is on right now (0 = the first step).
-    private int currentStep = 0;
+    // Which step is selected (-1 = none selected, 0 = the first step).
+    private int currentStep = -1;
+
+    public TMP_Text stepCounterText;
+
+    // NEW: Each button has its own independent on/off state.
+    private List<bool> completedSteps = new List<bool>();
+
+    // NEW: Remember each button's original appearance.
+    private List<ColorBlock> originalColors = new List<ColorBlock>();
+    private List<Color> originalGraphicColors = new List<Color>();
+    private List<Selectable.Transition> originalTransitions =
+        new List<Selectable.Transition>();
 
     // Start runs once when the scene begins.
     void Start()
@@ -120,7 +131,7 @@ public class ProceduresPanel : MonoBehaviour
             AddStepButton(newButton, data.steps[i].text);
         }
 
-        currentStep = 0;
+        currentStep = -1;
         UpdateStepButtons();
     }
 
@@ -149,7 +160,7 @@ public class ProceduresPanel : MonoBehaviour
             AddStepButton(button, text);
         }
 
-        currentStep = 0;
+        currentStep = -1;
         UpdateStepButtons();
     }
 
@@ -161,6 +172,16 @@ public class ProceduresPanel : MonoBehaviour
         stepButtons.Add(button);
         stepTexts.Add(text);
 
+        // NEW: Start off and remember the original appearance.
+        completedSteps.Add(false);
+        originalColors.Add(button.colors);
+        originalTransitions.Add(button.transition);
+        originalGraphicColors.Add(
+            button.targetGraphic != null
+                ? button.targetGraphic.color
+                : Color.white
+        );
+
         button.GetComponentInChildren<TMP_Text>().text = text;
         button.onClick.AddListener(() => OnStepButtonPressed(stepNumber));
     }
@@ -170,8 +191,16 @@ public class ProceduresPanel : MonoBehaviour
     // Called when a step button is pressed. stepNumber is 0 for the first step, 1 for the second, ...
     public void OnStepButtonPressed(int stepNumber)
     {
-        Debug.Log("Procedures: step " + stepNumber + " pressed (" + stepTexts[stepNumber] + ")");
-        // TODO: decide what pressing a step does (mark it complete? select it?).
+        if (stepNumber < 0 || stepNumber >= stepButtons.Count)
+        {
+            return;
+        }
+
+        // NEW: Toggle only the clicked button.
+        completedSteps[stepNumber] = !completedSteps[stepNumber];
+        currentStep = stepNumber;
+
+        UpdateStepButtons();
     }
 
     // Move to the next step.
@@ -211,14 +240,97 @@ public class ProceduresPanel : MonoBehaviour
     // ---------------- Helpers ----------------
 
     // Redraws the step buttons to show which step is current.
+    // NEW: Button color now follows its independent on/off state.
     private void UpdateStepButtons()
     {
-        // TODO: highlight stepButtons[currentStep] and grey out finished steps.
+        int completedCount = 0;
+
+        for (int i = 0; i < stepButtons.Count; i++)
+        {
+            Button button = stepButtons[i];
+
+            if (completedSteps[i])
+            {
+                completedCount++;
+
+                // NEW: Blue stays blue even while hovered or selected.
+                Color blue = new Color(0.1f, 0.5f, 1f);
+
+                button.transition = Selectable.Transition.ColorTint;
+
+                if (button.targetGraphic != null)
+                {
+                    button.targetGraphic.color = Color.white;
+                }
+
+                ColorBlock colors = originalColors[i];
+                colors.normalColor = blue;
+                colors.highlightedColor = blue;
+                colors.pressedColor = blue;
+                colors.selectedColor = blue;
+                colors.disabledColor = blue;
+                colors.colorMultiplier = 1f;
+                colors.fadeDuration = 0f;
+
+                button.colors = colors;
+
+                if (button.targetGraphic != null)
+                {
+                    button.targetGraphic.CrossFadeColor(
+                        blue, 0f, true, true
+                    );
+                }
+            }
+            else
+            {
+                // NEW: Restore the button's actual original appearance.
+                RestoreButtonAppearance(i);
+            }
+        }
+
+        if (stepCounterText != null)
+        {
+            stepCounterText.text = stepButtons.Count > 0 && completedCount == stepButtons.Count
+                ? "Procedure complete"
+                : $"{completedCount} of {stepButtons.Count} steps complete";
+        }
+    }
+
+    // NEW: Restore saved colors instead of using a fixed red or gray.
+    private void RestoreButtonAppearance(int index)
+    {
+        Button button = stepButtons[index];
+
+        if (button.targetGraphic != null)
+        {
+            button.targetGraphic.color = originalGraphicColors[index];
+        }
+
+        button.colors = originalColors[index];
+        button.transition = originalTransitions[index];
+
+        if (button.targetGraphic != null &&
+            button.transition == Selectable.Transition.ColorTint)
+        {
+            button.targetGraphic.CrossFadeColor(
+                originalColors[index].normalColor *
+                originalColors[index].colorMultiplier,
+                0f,
+                true,
+                true
+            );
+        }
     }
 
     // Deletes buttons that were created from data (the default buttons are kept).
     private void RemoveCreatedButtons()
     {
+        // NEW: Restore originals before reusing them as templates.
+        for (int i = 0; i < stepButtons.Count; i++)
+        {
+            RestoreButtonAppearance(i);
+        }
+
         foreach (Button button in stepButtons)
         {
             bool isDefaultButton = System.Array.IndexOf(defaultStepButtons, button) >= 0;
@@ -233,6 +345,12 @@ public class ProceduresPanel : MonoBehaviour
         }
         stepButtons.Clear();
         stepTexts.Clear();
+
+        // NEW: Clear states and saved appearance when loading a new list.
+        completedSteps.Clear();
+        originalColors.Clear();
+        originalGraphicColors.Clear();
+        originalTransitions.Clear();
     }
 
     // Hides the buttons that are already in the prefab (used when steps come from data instead).
