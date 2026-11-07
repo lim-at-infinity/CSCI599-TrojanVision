@@ -290,8 +290,9 @@ public class ProceduresPanel : MonoBehaviour
 
         if (stepCounterText != null)
         {
-            stepCounterText.text =
-                "Step " + completedCount + "/" + stepButtons.Count;
+            stepCounterText.text = stepButtons.Count > 0 && completedCount == stepButtons.Count
+                ? "Procedure complete"
+                : $"{completedCount} of {stepButtons.Count} steps complete";
         }
     }
 
