@@ -31,6 +31,21 @@ namespace UnityEngine.XR.Templates.MR
 
         static readonly HashSet<TurnToFace> k_EnabledInstances = new HashSet<TurnToFace>();
 
+        /// <summary>
+        /// Reuse another panel's facing behavior, including its axis locks and offset.
+        /// Call while the destination panel is inactive, before OnEnable snaps its rotation.
+        /// </summary>
+        public void CopySettingsFrom(TurnToFace source)
+        {
+            m_FaceTarget = source.m_FaceTarget;
+            m_TurnToFaceSpeed = source.m_TurnToFaceSpeed;
+            m_RotationOffset = source.m_RotationOffset;
+            m_IgnoreX = source.m_IgnoreX;
+            m_IgnoreY = source.m_IgnoreY;
+            m_IgnoreZ = source.m_IgnoreZ;
+            enabled = source.enabled;
+        }
+
         void OnEnable()
         {
             transform.rotation = GetTargetRotation(transform.position);

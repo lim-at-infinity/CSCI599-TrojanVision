@@ -5,7 +5,7 @@ using UnityEngine.Serialization;
 using UnityEngine.UI;
 using UnityEngine.Video;
 // =====================================================================================
-// DocumentsPanel  (STUB - attached to the RIGHT hand)
+// DocumentsPanel - opens page-image documents and playable videos beside the HUD.
 //
 // Shows a grid of documents (manuals, diagrams, videos). Pressing one opens it.
 //
@@ -64,7 +64,20 @@ public class DocumentsPanel : MonoBehaviour
     // The button that gets copied for each document when data is loaded.
     // Leave empty to copy the first default button (Document 1).
     public Button documentButtonTemplate;
-    // NEW: Center popup and its video player.
+    [Header("Document viewers (created automatically if empty)")]
+    public PDFViewerPanel pdfViewer;
+    public DocumentVideoPanel videoViewer;
+
+    [Header("Demo media")]
+    [Tooltip("PDF pages converted to PNGs and imported as Sprite (2D and UI), in page order.")]
+    public Sprite[] pdfPages;
+    [Tooltip("Optional imported video clip. Takes priority over the JSON URL.")]
+    public VideoClip documentVideoClip;
+    [Tooltip("Optional path relative to Assets/StreamingAssets, e.g. PaperAirplane/basic-dart.mp4.")]
+    public string videoStreamingAssetsPath;
+
+    // Kept for existing scene references. Document playback uses videoViewer.
+    [Header("Legacy popup (optional)")]
     public GameObject videoPopup;
     public VideoPlayer popupVideoPlayer;
     // The document buttons currently on screen (either the default ones or ones made from data).
@@ -99,6 +112,13 @@ public class DocumentsPanel : MonoBehaviour
     // Call this from other scripts whenever new document data arrives.
     public void SetDocuments(DocumentListData data)
     {
+        if (data == null || data.documents == null || System.Array.Exists(data.documents, item => item == null))
+        {
+            Debug.LogWarning("Documents: document data must contain valid entries.", this);
+            return;
+        }
+        if (openDocument >= 0)
+            CloseDocument();
         Button template = documentButtonTemplate != null ? documentButtonTemplate : FirstDefaultButton();
         if (template == null)
         {
@@ -137,6 +157,7 @@ public class DocumentsPanel : MonoBehaviour
 
             // Use the name from "Default Document Names" if there is one, otherwise keep the text in the prefab.
             DocumentData document = new DocumentData();
+            document.type = i == 1 ? "video" : "pdf";
             if (i < defaultDocumentNames.Length)
             {
                 document.name = defaultDocumentNames[i];
@@ -169,65 +190,84 @@ public class DocumentsPanel : MonoBehaviour
     // Called when a document button is pressed. documentNumber is 0 for the first document, 1 for the second, ...
     public void OpenDocument(int documentNumber)
     {
-        openDocument = documentNumber;
+        if (documentNumber < 0 || documentNumber >= documents.Count)
+            return;
         DocumentData document = documents[documentNumber];
-        Debug.Log("Documents: opened " + document.name + " (type: " + document.type + ")");
-        // TODO: hide the grid and show the document (PDF page, image, video, or 3D model) based on document.type.
-        if (document.type == "video")
+        string type = (document.type ?? "").Trim().ToLowerInvariant();
+        if (type != "pdf" && type != "image" && type != "video")
         {
-        if (videoPopup == null || popupVideoPlayer == null)
-        {
-            Debug.LogWarning("Please assign Video Popup and Popup Video Player.");
+            Debug.LogWarning("Documents: unsupported document type: " + document.type, this);
             return;
         }
-
-        videoPopup.SetActive(true);
-        popupVideoPlayer.Stop();
-            popupVideoPlayer.Play();
-    }
-    else
-    {
-    // NEW: Stop any video when another document is selected.
-    if (popupVideoPlayer != null)
-    {
-        popupVideoPlayer.Stop();
-    }
-
-    if (videoPopup != null)
-    {
-        videoPopup.SetActive(false);
-    }
-}
+        CreateViewers();
+        CloseViewers();
+        openDocument = documentNumber;
+        if (type == "video")
+        {
+            DocumentViewerFactory.SynchronizeLayout(this, (RectTransform)videoViewer.transform);
+            videoViewer.Open(this, document.name, documentVideoClip, videoStreamingAssetsPath, document.url);
+        }
+        else
+        {
+            DocumentViewerFactory.SynchronizeLayout(this, (RectTransform)pdfViewer.transform);
+            pdfViewer.Open(this, document.name, pdfPages);
+        }
+        // Viewers are siblings, so disabling the menu does not disable playback or Close.
+        gameObject.SetActive(false);
     }
 
     // Close the open document and go back to the grid.
     public void CloseDocument()
     {
-        Debug.Log("Documents: closed document " + openDocument);
         openDocument = -1;
-        // TODO: hide the document and show the grid again.
-        // NEW: Stop playback and hide the center popup.
-    if (popupVideoPlayer != null)
-    {
-        popupVideoPlayer.Stop();
+        CloseViewers();
+        gameObject.SetActive(true);
     }
 
-    if (videoPopup != null)
+    // Also available in the Inspector to create editable panels before entering Play mode.
+    public void CreateViewers()
     {
-        videoPopup.SetActive(false);
+        if (pdfViewer == null)
+            pdfViewer = DocumentViewerFactory.CreatePDF(this);
+        if (videoViewer == null)
+            videoViewer = DocumentViewerFactory.CreateVideo(this);
     }
+
+    private void CloseViewers()
+    {
+        if (pdfViewer != null)
+            pdfViewer.gameObject.SetActive(false);
+        if (videoViewer != null)
+            videoViewer.gameObject.SetActive(false);
+        if (popupVideoPlayer != null)
+            popupVideoPlayer.Stop();
+        if (videoPopup != null)
+            videoPopup.SetActive(false);
     }
 
     // Show the whole panel.
     public void Show()
     {
-        gameObject.SetActive(true);
+        CloseDocument();
     }
 
     // Hide the whole panel.
     public void Hide()
     {
+        CloseViewers();
+        openDocument = -1;
         gameObject.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        // Runtime-created sibling panels must not outlive their menu.
+        if (!Application.isPlaying)
+            return;
+        if (pdfViewer != null)
+            Destroy(pdfViewer.gameObject);
+        if (videoViewer != null)
+            Destroy(videoViewer.gameObject);
     }
 
     // ---------------- Helpers ----------------

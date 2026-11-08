@@ -1,8 +1,6 @@
 {
   "documents": [
-    { "name": "Brake Service Manual", "type": "pdf", "url": "" },
-    { "name": "Torque Spec Sheet", "type": "pdf", "url": "" },
-    { "name": "Caliper Diagram", "type": "image", "url": "" },
-    { "name": "Pad Replacement Video", "type": "video", "url": "" }
+    { "name": "Paper Airplane Instructions", "type": "pdf", "url": "" },
+    { "name": "Paper Airplane Video Guide", "type": "video", "url": "https://www.youtube.com/watch?v=gZQI1Z_viNg&t=2s" }
   ]
 }
