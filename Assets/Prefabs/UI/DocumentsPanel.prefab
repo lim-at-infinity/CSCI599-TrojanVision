@@ -349,6 +349,13 @@ MonoBehaviour:
   - Document 3
   documentDataFile: {fileID: 0}
   documentButtonTemplate: {fileID: 0}
+  pdfPages:
+  - {fileID: 21300000, guid: f9d9447e71e4f794cb4e5fe7610ab493, type: 3}
+  - {fileID: 21300000, guid: 97cbe267470dc0b43a33b2b8ee6cc49b, type: 3}
+  - {fileID: 21300000, guid: 578e35c8a7e673a4a9b5f36aa05c033f, type: 3}
+  - {fileID: 21300000, guid: 547ebb16f126660499f6fb82c4749943, type: 3}
+  documentVideoClip: {fileID: 32900000, guid: ff84aa7bb01a5fc4db065de6ed49e753, type: 3}
+  videoStreamingAssetsPath:
 --- !u!114 &4058882433749852758
 MonoBehaviour:
   m_ObjectHideFlags: 0

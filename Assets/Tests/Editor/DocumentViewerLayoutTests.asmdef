@@ -1,0 +1,7 @@
+{
+    "name": "TrojanVision.DocumentViewerLayoutTests",
+    "references": ["MRTemplate"],
+    "includePlatforms": ["Editor"],
+    "optionalUnityReferences": ["TestAssemblies"],
+    "autoReferenced": false
+}

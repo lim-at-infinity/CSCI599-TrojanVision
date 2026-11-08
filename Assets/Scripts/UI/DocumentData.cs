@@ -56,5 +56,5 @@ public class DocumentData
 {
     public string name;  // the words shown on the document button
     public string type;  // what kind of file: "pdf", "image", "video" or "model"
-    public string url;   // where the file lives (e.g. a Supabase link). Not used yet.
+    public string url;   // Direct playable video-file URL. YouTube watch pages are not video files.
 }
