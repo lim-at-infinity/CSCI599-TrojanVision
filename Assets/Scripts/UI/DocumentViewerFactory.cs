@@ -12,17 +12,17 @@ public static class DocumentViewerFactory
     {
         RectTransform root = CreateRoot(menu, "PDFViewerPanel");
         var panel = root.gameObject.AddComponent<PDFViewerPanel>();
-        panel.titleText = Label(root, "Title", "Document", .05f, .86f, .78f, .97f, menu);
-        panel.closeButton = Button(root, "Close", .80f, .87f, .97f, .97f, menu);
-        var page = Box(root, "PageImage", .05f, .18f, .95f, .84f);
+        panel.titleText = CreateLabel(root, "Title", "Document", .05f, .86f, .78f, .97f, menu);
+        panel.closeButton = CreateButton(root, "Close", .80f, .87f, .97f, .97f, menu);
+        var page = CreateRect(root, "PageImage", .05f, .18f, .95f, .84f);
         panel.pageImage = page.gameObject.AddComponent<Image>();
         panel.pageImage.raycastTarget = false;
         panel.pageImage.preserveAspect = true;
-        panel.statusText = Label(root, "Status", "No document pages available yet.",
+        panel.statusText = CreateLabel(root, "Status", "No document pages available yet.",
             .08f, .3f, .92f, .7f, menu);
-        panel.previousButton = Button(root, "Previous", .05f, .04f, .34f, .15f, menu);
-        panel.pageCounter = Label(root, "PageCounter", "0 / 0", .35f, .04f, .65f, .15f, menu);
-        panel.nextButton = Button(root, "Next", .66f, .04f, .95f, .15f, menu);
+        panel.previousButton = CreateButton(root, "Previous", .05f, .04f, .34f, .15f, menu);
+        panel.pageCounter = CreateLabel(root, "PageCounter", "0 / 0", .35f, .04f, .65f, .15f, menu);
+        panel.nextButton = CreateButton(root, "Next", .66f, .04f, .95f, .15f, menu);
         return panel;
     }
 
@@ -30,21 +30,21 @@ public static class DocumentViewerFactory
     {
         RectTransform root = CreateRoot(menu, "DocumentVideoPanel");
         var panel = root.gameObject.AddComponent<DocumentVideoPanel>();
-        panel.titleText = Label(root, "Title", "Video", .05f, .86f, .78f, .97f, menu);
-        panel.closeButton = Button(root, "Close", .80f, .87f, .97f, .97f, menu);
-        var videoArea = Box(root, "VideoArea", .05f, .25f, .95f, .84f);
-        var video = Box(videoArea, "VideoImage", 0, 0, 1, 1);
+        panel.titleText = CreateLabel(root, "Title", "Video", .05f, .86f, .78f, .97f, menu);
+        panel.closeButton = CreateButton(root, "Close", .80f, .87f, .97f, .97f, menu);
+        var videoArea = CreateRect(root, "VideoArea", .05f, .25f, .95f, .84f);
+        var video = CreateRect(videoArea, "VideoImage", 0, 0, 1, 1);
         panel.videoImage = video.gameObject.AddComponent<RawImage>();
         panel.videoImage.raycastTarget = false;
         var fitter = video.gameObject.AddComponent<AspectRatioFitter>();
         fitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
         fitter.aspectRatio = 16f / 9f;
-        panel.statusText = Label(root, "Status", "No video available yet.", .08f, .3f, .92f, .7f, menu);
-        panel.timeText = Label(root, "Time", "0:00 / 0:00", .05f, .17f, .95f, .24f, menu);
-        panel.backwardButton = Button(root, "-10 sec", .05f, .04f, .34f, .15f, menu);
-        panel.playPauseButton = Button(root, "Play", .355f, .04f, .645f, .15f, menu);
+        panel.statusText = CreateLabel(root, "Status", "No video available yet.", .08f, .3f, .92f, .7f, menu);
+        panel.timeText = CreateLabel(root, "Time", "0:00 / 0:00", .05f, .17f, .95f, .24f, menu);
+        panel.backwardButton = CreateButton(root, "-10 sec", .05f, .04f, .34f, .15f, menu);
+        panel.playPauseButton = CreateButton(root, "Play", .355f, .04f, .645f, .15f, menu);
         panel.playPauseText = panel.playPauseButton.GetComponentInChildren<TMP_Text>();
-        panel.forwardButton = Button(root, "+10 sec", .66f, .04f, .95f, .15f, menu);
+        panel.forwardButton = CreateButton(root, "+10 sec", .66f, .04f, .95f, .15f, menu);
         panel.player = root.gameObject.AddComponent<VideoPlayer>();
         panel.player.playOnAwake = false;
         panel.audioSource = root.gameObject.AddComponent<AudioSource>();
@@ -71,7 +71,7 @@ public static class DocumentViewerFactory
         root.gameObject.AddComponent<CanvasScaler>().dynamicPixelsPerUnit = 4;
         root.gameObject.AddComponent<TrackedDeviceGraphicRaycaster>();
         root.gameObject.AddComponent<GraphicRaycaster>();
-        var background = Box(root, "Background", 0, 0, 1, 1).gameObject.AddComponent<Image>();
+        var background = CreateRect(root, "Background", 0, 0, 1, 1).gameObject.AddComponent<Image>();
         background.color = new Color(.035f, .055f, .085f, .98f);
         return root;
     }
@@ -107,7 +107,7 @@ public static class DocumentViewerFactory
             viewerFacing.enabled = false;
     }
 
-    private static RectTransform Box(Transform parent, string name, float x0, float y0, float x1, float y1)
+    private static RectTransform CreateRect(Transform parent, string name, float x0, float y0, float x1, float y1)
     {
         var rect = new GameObject(name, typeof(RectTransform)).GetComponent<RectTransform>();
         rect.SetParent(parent, false);
@@ -118,10 +118,10 @@ public static class DocumentViewerFactory
         return rect;
     }
 
-    private static TMP_Text Label(Transform parent, string name, string value,
+    private static TMP_Text CreateLabel(Transform parent, string name, string value,
         float x0, float y0, float x1, float y1, DocumentsPanel menu)
     {
-        var label = Box(parent, name, x0, y0, x1, y1).gameObject.AddComponent<TextMeshProUGUI>();
+        var label = CreateRect(parent, name, x0, y0, x1, y1).gameObject.AddComponent<TextMeshProUGUI>();
         label.font = menu.titleText != null ? menu.titleText.font : TMP_Settings.defaultFontAsset;
         label.text = value;
         label.fontSize = 22;
@@ -135,10 +135,10 @@ public static class DocumentViewerFactory
         return label;
     }
 
-    private static Button Button(Transform parent, string text,
+    private static Button CreateButton(Transform parent, string text,
         float x0, float y0, float x1, float y1, DocumentsPanel menu)
     {
-        var rect = Box(parent, text + "Button", x0, y0, x1, y1);
+        var rect = CreateRect(parent, text + "Button", x0, y0, x1, y1);
         var image = rect.gameObject.AddComponent<Image>();
         image.color = new Color(.12f, .25f, .37f);
         var button = rect.gameObject.AddComponent<Button>();
@@ -146,7 +146,7 @@ public static class DocumentViewerFactory
         var colors = button.colors;
         colors.disabledColor = new Color(.35f, .35f, .35f, .6f);
         button.colors = colors;
-        Label(rect, "Label", text, .04f, .04f, .96f, .96f, menu);
+        CreateLabel(rect, "Label", text, .04f, .04f, .96f, .96f, menu);
         return button;
     }
 }

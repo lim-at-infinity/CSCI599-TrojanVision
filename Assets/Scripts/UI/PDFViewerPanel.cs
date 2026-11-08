@@ -16,6 +16,7 @@ public class PDFViewerPanel : MonoBehaviour
     private Sprite[] pages = System.Array.Empty<Sprite>();
     private int currentPage;
     private DocumentsPanel owner;
+    private bool subscribed;
 
     public void Open(DocumentsPanel documents, string documentTitle, Sprite[] documentPages)
     {
@@ -23,14 +24,19 @@ public class PDFViewerPanel : MonoBehaviour
         pages = documentPages ?? System.Array.Empty<Sprite>();
         currentPage = 0;
         titleText.text = documentTitle;
-        previousButton.onClick.RemoveListener(PreviousPage);
-        nextButton.onClick.RemoveListener(NextPage);
-        closeButton.onClick.RemoveListener(Close);
+        Subscribe();
+        gameObject.SetActive(true);
+        Refresh();
+    }
+
+    private void Subscribe()
+    {
+        if (subscribed)
+            return;
+        subscribed = true;
         previousButton.onClick.AddListener(PreviousPage);
         nextButton.onClick.AddListener(NextPage);
         closeButton.onClick.AddListener(Close);
-        gameObject.SetActive(true);
-        Refresh();
     }
 
     public void PreviousPage()
@@ -60,8 +66,21 @@ public class PDFViewerPanel : MonoBehaviour
 
     public void Close()
     {
-        gameObject.SetActive(false);
         if (owner != null)
             owner.CloseDocument();
+        else
+            gameObject.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        if (!subscribed)
+            return;
+        if (previousButton != null)
+            previousButton.onClick.RemoveListener(PreviousPage);
+        if (nextButton != null)
+            nextButton.onClick.RemoveListener(NextPage);
+        if (closeButton != null)
+            closeButton.onClick.RemoveListener(Close);
     }
 }

@@ -7,6 +7,9 @@ using UnityEngine.Video;
 
 public class DocumentVideoPanel : MonoBehaviour
 {
+    private const double SeekSeconds = 10;
+    private const double EndOfVideoMargin = 0.05;
+
     public TMP_Text titleText;
     public RawImage videoImage;
     public TMP_Text statusText;
@@ -25,21 +28,14 @@ public class DocumentVideoPanel : MonoBehaviour
     private bool resumeAfterSeek;
     private bool subscribed;
 
-    private void Awake()
-    {
-        // Also works for panels created at runtime, whose fields are assigned after Awake.
-        Subscribe();
-    }
-
     private void Subscribe()
     {
-        if (subscribed || player == null)
+        if (subscribed)
             return;
         subscribed = true;
         player.prepareCompleted += Prepared;
         player.errorReceived += Failed;
         player.seekCompleted += SeekCompleted;
-        player.loopPointReached += Finished;
         playPauseButton.onClick.AddListener(TogglePlayback);
         backwardButton.onClick.AddListener(BackwardTenSeconds);
         forwardButton.onClick.AddListener(ForwardTenSeconds);
@@ -52,8 +48,7 @@ public class DocumentVideoPanel : MonoBehaviour
         owner = documents;
         gameObject.SetActive(true);
         Subscribe();
-        player.Stop();
-        seeking = false;
+        StopPlayback();
         titleText.text = documentTitle;
         videoImage.enabled = false;
         statusText.text = "Loading video...";
@@ -61,6 +56,16 @@ public class DocumentVideoPanel : MonoBehaviour
         playPauseText.text = "Play";
         SetControls(false);
 
+        ConfigurePlayer();
+        if (!TrySetSource(clip, streamingAssetsPath, url))
+            return;
+
+        EnsureRenderTexture();
+        player.Prepare();
+    }
+
+    private void ConfigurePlayer()
+    {
         player.playOnAwake = false;
         player.isLooping = false;
         player.renderMode = VideoRenderMode.RenderTexture;
@@ -68,35 +73,47 @@ public class DocumentVideoPanel : MonoBehaviour
         player.controlledAudioTrackCount = 1;
         player.SetTargetAudioSource(0, audioSource);
         player.EnableAudioTrack(0, true);
+    }
 
+    private bool TrySetSource(VideoClip clip, string streamingAssetsPath, string url)
+    {
         // Imported clips and local files take precedence over a JSON web URL.
         if (clip != null)
         {
             player.source = VideoSource.VideoClip;
             player.clip = clip;
-        }
-        else
-        {
-            string source = url;
-            if (!string.IsNullOrWhiteSpace(streamingAssetsPath))
-                source = Path.Combine(Application.streamingAssetsPath, streamingAssetsPath).Replace('\\', '/');
-            if (string.IsNullOrWhiteSpace(source))
-            {
-                statusText.text = "No video available yet.";
-                return;
-            }
-            if (Uri.TryCreate(source, UriKind.Absolute, out Uri address) &&
-                (address.Host.Equals("youtu.be", StringComparison.OrdinalIgnoreCase) ||
-                 address.Host.Equals("youtube.com", StringComparison.OrdinalIgnoreCase) ||
-                 address.Host.EndsWith(".youtube.com", StringComparison.OrdinalIgnoreCase)))
-            {
-                statusText.text = "This video uses a YouTube link. A playable video file is needed.";
-                return;
-            }
-            player.source = VideoSource.Url;
-            player.url = source;
+            return true;
         }
 
+        string source = string.IsNullOrWhiteSpace(streamingAssetsPath)
+            ? url
+            : Path.Combine(Application.streamingAssetsPath, streamingAssetsPath).Replace('\\', '/');
+        if (string.IsNullOrWhiteSpace(source))
+        {
+            statusText.text = "No video available yet.";
+            return false;
+        }
+        if (IsYouTubeUrl(source))
+        {
+            statusText.text = "This video uses a YouTube link. A playable video file is needed.";
+            return false;
+        }
+
+        player.source = VideoSource.Url;
+        player.url = source;
+        return true;
+    }
+
+    private static bool IsYouTubeUrl(string source)
+    {
+        return Uri.TryCreate(source, UriKind.Absolute, out Uri address) &&
+            (address.Host.Equals("youtu.be", StringComparison.OrdinalIgnoreCase) ||
+             address.Host.Equals("youtube.com", StringComparison.OrdinalIgnoreCase) ||
+             address.Host.EndsWith(".youtube.com", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void EnsureRenderTexture()
+    {
         if (texture == null)
         {
             texture = new RenderTexture(1280, 720, 0) { name = "Document video" };
@@ -104,7 +121,6 @@ public class DocumentVideoPanel : MonoBehaviour
         }
         player.targetTexture = texture;
         videoImage.texture = texture;
-        player.Prepare();
     }
 
     private void Prepared(VideoPlayer source)
@@ -134,14 +150,14 @@ public class DocumentVideoPanel : MonoBehaviour
         }
     }
 
-    public void BackwardTenSeconds() => Seek(-10);
-    public void ForwardTenSeconds() => Seek(10);
+    public void BackwardTenSeconds() => Seek(-SeekSeconds);
+    public void ForwardTenSeconds() => Seek(SeekSeconds);
 
     private void Seek(double seconds)
     {
         if (!player.isPrepared || !player.canSetTime || seeking || player.length <= 0)
             return;
-        double target = Math.Max(0, Math.Min(player.length - 0.05, player.time + seconds));
+        double target = Math.Max(0, Math.Min(player.length - EndOfVideoMargin, player.time + seconds));
         if (Math.Abs(target - player.time) < 0.01)
             return;
         resumeAfterSeek = player.isPlaying;
@@ -159,11 +175,6 @@ public class DocumentVideoPanel : MonoBehaviour
         if (resumeAfterSeek)
             source.Play();
         SetControls(true);
-    }
-
-    private void Finished(VideoPlayer source)
-    {
-        playPauseText.text = "Play";
     }
 
     private void Update()
@@ -191,8 +202,7 @@ public class DocumentVideoPanel : MonoBehaviour
 
     private void Failed(VideoPlayer source, string message)
     {
-        source.Stop();
-        seeking = false;
+        StopPlayback();
         videoImage.enabled = false;
         statusText.text = "Video could not be loaded. Close and try again.";
         SetControls(false);
@@ -201,26 +211,39 @@ public class DocumentVideoPanel : MonoBehaviour
 
     public void Close()
     {
-        gameObject.SetActive(false);
         if (owner != null)
             owner.CloseDocument();
+        else
+            gameObject.SetActive(false);
     }
 
-    private void OnDisable()
+    private void StopPlayback()
     {
         seeking = false;
         if (player != null)
             player.Stop();
     }
 
+    private void OnDisable() => StopPlayback();
+
     private void OnDestroy()
     {
-        if (subscribed && player != null)
+        if (subscribed)
         {
-            player.prepareCompleted -= Prepared;
-            player.errorReceived -= Failed;
-            player.seekCompleted -= SeekCompleted;
-            player.loopPointReached -= Finished;
+            if (player != null)
+            {
+                player.prepareCompleted -= Prepared;
+                player.errorReceived -= Failed;
+                player.seekCompleted -= SeekCompleted;
+            }
+            if (playPauseButton != null)
+                playPauseButton.onClick.RemoveListener(TogglePlayback);
+            if (backwardButton != null)
+                backwardButton.onClick.RemoveListener(BackwardTenSeconds);
+            if (forwardButton != null)
+                forwardButton.onClick.RemoveListener(ForwardTenSeconds);
+            if (closeButton != null)
+                closeButton.onClick.RemoveListener(Close);
         }
         if (texture != null)
         {

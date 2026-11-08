@@ -64,6 +64,7 @@ public class DocumentsPanel : MonoBehaviour
     // The button that gets copied for each document when data is loaded.
     // Leave empty to copy the first default button (Document 1).
     public Button documentButtonTemplate;
+
     [Header("Document viewers (created automatically if empty)")]
     public PDFViewerPanel pdfViewer;
     public DocumentVideoPanel videoViewer;
@@ -80,14 +81,14 @@ public class DocumentsPanel : MonoBehaviour
     [Header("Legacy popup (optional)")]
     public GameObject videoPopup;
     public VideoPlayer popupVideoPlayer;
+
     // The document buttons currently on screen (either the default ones or ones made from data).
     private List<Button> documentButtons = new List<Button>();
 
     // The info for each document currently on screen (name, type, url).
     private List<DocumentData> documents = new List<DocumentData>();
 
-    // Which document is open right now (-1 = none open, the grid is showing).
-    private int openDocument = -1;
+    private bool isViewerOpen;
 
     // Start runs once when the scene begins.
     void Start()
@@ -117,7 +118,7 @@ public class DocumentsPanel : MonoBehaviour
             Debug.LogWarning("Documents: document data must contain valid entries.", this);
             return;
         }
-        if (openDocument >= 0)
+        if (isViewerOpen)
             CloseDocument();
         Button template = documentButtonTemplate != null ? documentButtonTemplate : FirstDefaultButton();
         if (template == null)
@@ -142,7 +143,7 @@ public class DocumentsPanel : MonoBehaviour
             AddDocumentButton(newButton, data.documents[i]);
         }
 
-        openDocument = -1;
+        isViewerOpen = false;
     }
 
     // Uses the buttons that are already in the prefab, with the default names.
@@ -170,7 +171,7 @@ public class DocumentsPanel : MonoBehaviour
             AddDocumentButton(button, document);
         }
 
-        openDocument = -1;
+        isViewerOpen = false;
     }
 
     // Puts a button on the list, sets its text, and makes pressing it call OpenDocument.
@@ -201,7 +202,7 @@ public class DocumentsPanel : MonoBehaviour
         }
         CreateViewers();
         CloseViewers();
-        openDocument = documentNumber;
+        isViewerOpen = true;
         if (type == "video")
         {
             DocumentViewerFactory.SynchronizeLayout(this, (RectTransform)videoViewer.transform);
@@ -219,7 +220,7 @@ public class DocumentsPanel : MonoBehaviour
     // Close the open document and go back to the grid.
     public void CloseDocument()
     {
-        openDocument = -1;
+        isViewerOpen = false;
         CloseViewers();
         gameObject.SetActive(true);
     }
@@ -255,7 +256,7 @@ public class DocumentsPanel : MonoBehaviour
     public void Hide()
     {
         CloseViewers();
-        openDocument = -1;
+        isViewerOpen = false;
         gameObject.SetActive(false);
     }
 

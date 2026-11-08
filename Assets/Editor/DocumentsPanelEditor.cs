@@ -14,20 +14,22 @@ public class DocumentsPanelEditor : Editor
         using (new EditorGUI.DisabledScope(Application.isPlaying || EditorUtility.IsPersistent(target)))
         {
             if (GUILayout.Button("Create Document Viewers"))
-            {
-                var menu = (DocumentsPanel)target;
-                Undo.RecordObject(menu, "Create document viewers");
-                var previousPDF = menu.pdfViewer;
-                var previousVideo = menu.videoViewer;
-                menu.CreateViewers();
-                if (previousPDF == null)
-                    Undo.RegisterCreatedObjectUndo(menu.pdfViewer.gameObject, "Create PDF viewer");
-                if (previousVideo == null)
-                    Undo.RegisterCreatedObjectUndo(menu.videoViewer.gameObject, "Create video viewer");
-                PrefabUtility.RecordPrefabInstancePropertyModifications(menu);
-                EditorUtility.SetDirty(menu);
-                EditorSceneManager.MarkSceneDirty(menu.gameObject.scene);
-            }
+                CreateViewers((DocumentsPanel)target);
         }
+    }
+
+    private static void CreateViewers(DocumentsPanel menu)
+    {
+        Undo.RecordObject(menu, "Create document viewers");
+        bool createPDF = menu.pdfViewer == null;
+        bool createVideo = menu.videoViewer == null;
+        menu.CreateViewers();
+        if (createPDF)
+            Undo.RegisterCreatedObjectUndo(menu.pdfViewer.gameObject, "Create PDF viewer");
+        if (createVideo)
+            Undo.RegisterCreatedObjectUndo(menu.videoViewer.gameObject, "Create video viewer");
+        PrefabUtility.RecordPrefabInstancePropertyModifications(menu);
+        EditorUtility.SetDirty(menu);
+        EditorSceneManager.MarkSceneDirty(menu.gameObject.scene);
     }
 }
