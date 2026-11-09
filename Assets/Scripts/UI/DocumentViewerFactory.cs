@@ -8,6 +8,9 @@ using UnityEngine.XR.Templates.MR;
 // Builds editable UI using the Documents menu's pose, layer, size and font.
 public static class DocumentViewerFactory
 {
+    // Space between the Documents menu and the viewer beside it, in meters (0.02 = 2 cm).
+    private const float ViewerGapMeters = 0.02f;
+
     public static PDFViewerPanel CreatePDF(DocumentsPanel menu)
     {
         RectTransform root = CreateRoot(menu, "PDFViewerPanel");
@@ -105,6 +108,21 @@ public static class DocumentViewerFactory
         }
         else if (viewerFacing != null)
             viewerFacing.enabled = false;
+
+        // Hand-attached menus (XR-Setup): the viewer floats above the same hand as the menu.
+        var sourceFollow = menu.GetComponent<HandFollowPanel>();
+        var viewerFollow = root.GetComponent<HandFollowPanel>();
+        if (sourceFollow != null)
+        {
+            if (viewerFollow == null)
+                viewerFollow = root.gameObject.AddComponent<HandFollowPanel>();
+            viewerFollow.CopySettingsFrom(sourceFollow);
+
+            // Sit to the left of the menu (easier to reach): one panel width, plus a small gap.
+            viewerFollow.sideOffset = -(root.rect.width * root.lossyScale.x + ViewerGapMeters);
+        }
+        else if (viewerFollow != null)
+            viewerFollow.enabled = false;
     }
 
     private static RectTransform CreateRect(Transform parent, string name, float x0, float y0, float x1, float y1)

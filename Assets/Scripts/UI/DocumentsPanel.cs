@@ -214,7 +214,22 @@ public class DocumentsPanel : MonoBehaviour
             pdfViewer.Open(this, document.name, pdfPages);
         }
         // Viewers are siblings, so disabling the menu does not disable playback or Close.
-        gameObject.SetActive(false);
+        // Hand-following menus stay visible because the viewer sits beside them, not on top.
+        if (GetComponent<HandFollowPanel>() == null)
+            gameObject.SetActive(false);
+    }
+
+    // Opens the first document of this type ("pdf" or "video"). Used by voice commands.
+    public void OpenFirstDocumentOfType(string type)
+    {
+        for (int i = 0; i < documents.Count; i++)
+        {
+            if (string.Equals(documents[i].type, type, System.StringComparison.OrdinalIgnoreCase))
+            {
+                OpenDocument(i);
+                return;
+            }
+        }
     }
 
     // Close the open document and go back to the grid.
