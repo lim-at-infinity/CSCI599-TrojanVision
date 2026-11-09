@@ -112,3 +112,9 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Wit.ai secrets - shared privately, never commit
+/ProjectSettings/wit.config
+/Assets/Voice/
+/Assets/Voice.meta
+/ProjectSettings/WitConfigExports/
