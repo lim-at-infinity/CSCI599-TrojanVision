@@ -219,6 +219,19 @@ public class DocumentsPanel : MonoBehaviour
             gameObject.SetActive(false);
     }
 
+    // Opens the first document of this type ("pdf" or "video"). Used by voice commands.
+    public void OpenFirstDocumentOfType(string type)
+    {
+        for (int i = 0; i < documents.Count; i++)
+        {
+            if (string.Equals(documents[i].type, type, System.StringComparison.OrdinalIgnoreCase))
+            {
+                OpenDocument(i);
+                return;
+            }
+        }
+    }
+
     // Close the open document and go back to the grid.
     public void CloseDocument()
     {

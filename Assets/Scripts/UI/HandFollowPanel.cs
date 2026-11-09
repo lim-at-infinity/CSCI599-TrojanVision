@@ -1,3 +1,4 @@
+using Oculus.Interaction.Input;
 using UnityEngine;
 
 // =====================================================================================
@@ -33,6 +34,16 @@ public class HandFollowPanel : MonoBehaviour
 
     // How quickly the panel catches up to the hand. Higher = snappier, lower = floatier.
     public float followSpeed = 10f;
+
+    // How far the panel slides outward when its palm faces down, in meters (0 = never).
+    // A hand reaching for the other panel usually has its palm down, so this moves its own panel out of the way.
+    public float palmDownSideShift = 0.25f;
+
+    // Meta's tracked hand data for this hand, used to read which way the palm faces.
+    private Hand trackedHand;
+
+    // True while this hand's palm is facing down.
+    private bool isPalmDown = false;
 
     [Header("Hiding")]
 
@@ -78,7 +89,11 @@ public class HandFollowPanel : MonoBehaviour
 
         // Detach from the hand anchor, so moving that hand no longer moves the panel.
         // DocumentViewerFactory attaches it again the next time the viewer opens.
+        // Detaching can throw a Canvas far away, so put it back exactly where it was.
+        Vector3 positionBeforeDetach = transform.position;
+        Quaternion rotationBeforeDetach = transform.rotation;
         transform.SetParent(null, true);
+        transform.SetPositionAndRotation(positionBeforeDetach, rotationBeforeDetach);
 
         // The panel may be hidden if its hand was just lost.
         if (panelCanvas != null)
@@ -172,6 +187,14 @@ public class HandFollowPanel : MonoBehaviour
         // Slide sideways after working out the rotation, so a viewer faces the same way as the menu beside it.
         targetPosition += targetRotation * Vector3.right * sideOffset;
 
+        // Palm down: slide outward, to the left for the left hand and the right for the right hand.
+        UpdatePalmDirection();
+        if (isPalmDown)
+        {
+            float outward = handType == OVRPlugin.Hand.HandLeft ? -palmDownSideShift : palmDownSideShift;
+            targetPosition += targetRotation * Vector3.right * outward;
+        }
+
         if (!hasStarted)
         {
             // First frame: jump straight into place.
@@ -201,7 +224,45 @@ public class HandFollowPanel : MonoBehaviour
         followSpeed = source.followSpeed;
         hideWhenHandLost = source.hideWhenHandLost;
         hideDelay = source.hideDelay;
+        palmDownSideShift = source.palmDownSideShift;
         enabled = source.enabled;
+    }
+
+    // Works out whether this hand's palm is facing down. Between the two limits it keeps its last answer,
+    // so the panel doesn't flicker from side to side when the hand is held sideways.
+    private void UpdatePalmDirection()
+    {
+        bool isLeft = handType == OVRPlugin.Hand.HandLeft;
+
+        if (trackedHand == null)
+        {
+            Handedness wanted = isLeft ? Handedness.Left : Handedness.Right;
+            foreach (Hand candidate in FindObjectsByType<Hand>(FindObjectsSortMode.None))
+            {
+                if (candidate.Handedness == wanted)
+                {
+                    trackedHand = candidate;
+                    break;
+                }
+            }
+        }
+
+        if (trackedHand == null || !trackedHand.GetJointPose(HandJointId.HandWristRoot, out Pose wrist))
+        {
+            return;
+        }
+
+        Vector3 palmDirection = wrist.rotation * (isLeft ? Constants.LeftPalmar : Constants.RightPalmar);
+        float upness = Vector3.Dot(palmDirection, Vector3.up);
+
+        if (upness < -0.3f)
+        {
+            isPalmDown = true;
+        }
+        else if (upness > 0f)
+        {
+            isPalmDown = false;
+        }
     }
 
     // Shows or hides the panel depending on whether its hand is tracked.
