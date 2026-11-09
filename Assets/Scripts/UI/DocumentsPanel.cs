@@ -214,7 +214,9 @@ public class DocumentsPanel : MonoBehaviour
             pdfViewer.Open(this, document.name, pdfPages);
         }
         // Viewers are siblings, so disabling the menu does not disable playback or Close.
-        gameObject.SetActive(false);
+        // Hand-following menus stay visible because the viewer sits beside them, not on top.
+        if (GetComponent<HandFollowPanel>() == null)
+            gameObject.SetActive(false);
     }
 
     // Close the open document and go back to the grid.

@@ -28,6 +28,9 @@ public class HandFollowPanel : MonoBehaviour
     // How far above the hand the panel floats, in meters (0.12 = 12 cm).
     public float heightAboveHand = 0.12f;
 
+    // How far to the user's right the panel sits, in meters. Document viewers use this to sit beside the menu.
+    public float sideOffset = 0f;
+
     // How quickly the panel catches up to the hand. Higher = snappier, lower = floatier.
     public float followSpeed = 10f;
 
@@ -98,6 +101,9 @@ public class HandFollowPanel : MonoBehaviour
         {
             targetRotation = Quaternion.LookRotation(awayFromHead, Vector3.up);
         }
+
+        // Slide sideways after working out the rotation, so a viewer faces the same way as the menu beside it.
+        targetPosition += targetRotation * Vector3.right * sideOffset;
 
         if (!hasStarted)
         {
