@@ -49,6 +49,13 @@ public class HandFollowPanel : MonoBehaviour
     // False until the hand has been tracked once. Keeps the panel visible in the Editor without a headset.
     private bool hasSeenHand = false;
 
+    // Runs every time the panel is shown again (e.g. after a document viewer closes).
+    // Makes the next frame jump straight into place instead of sliding over from the old spot.
+    void OnEnable()
+    {
+        hasStarted = false;
+    }
+
     void Start()
     {
         if (hand == null)
@@ -108,6 +115,19 @@ public class HandFollowPanel : MonoBehaviour
         }
 
         transform.SetPositionAndRotation(currentPosition, currentRotation);
+    }
+
+    // Gives this panel the same hand, head and settings as another panel.
+    // Used so the PDF and video viewers float above the same hand as the Documents menu.
+    public void CopySettingsFrom(HandFollowPanel source)
+    {
+        hand = source.hand;
+        head = source.head;
+        handType = source.handType;
+        heightAboveHand = source.heightAboveHand;
+        followSpeed = source.followSpeed;
+        hideWhenHandLost = source.hideWhenHandLost;
+        enabled = source.enabled;
     }
 
     // Shows or hides the panel depending on whether its hand is tracked.

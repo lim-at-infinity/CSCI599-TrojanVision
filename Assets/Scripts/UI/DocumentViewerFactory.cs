@@ -105,6 +105,18 @@ public static class DocumentViewerFactory
         }
         else if (viewerFacing != null)
             viewerFacing.enabled = false;
+
+        // Hand-attached menus (XR-Setup): the viewer floats above the same hand as the menu.
+        var sourceFollow = menu.GetComponent<HandFollowPanel>();
+        var viewerFollow = root.GetComponent<HandFollowPanel>();
+        if (sourceFollow != null)
+        {
+            if (viewerFollow == null)
+                viewerFollow = root.gameObject.AddComponent<HandFollowPanel>();
+            viewerFollow.CopySettingsFrom(sourceFollow);
+        }
+        else if (viewerFollow != null)
+            viewerFollow.enabled = false;
     }
 
     private static RectTransform CreateRect(Transform parent, string name, float x0, float y0, float x1, float y1)
