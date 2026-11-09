@@ -131,6 +131,7 @@ public class ProceduresPanel : MonoBehaviour
             AddStepButton(newButton, data.steps[i].text);
         }
 
+        ApplyHandPanelLayout();
         currentStep = -1;
         UpdateStepButtons();
     }
@@ -160,8 +161,46 @@ public class ProceduresPanel : MonoBehaviour
             AddStepButton(button, text);
         }
 
+        ApplyHandPanelLayout();
         currentStep = -1;
         UpdateStepButtons();
+    }
+
+    // Places the step counter just under the panel, and sizes the title to fit on one line.
+    // Only for hand-attached panels (XR-Setup). The TrojanVisionDemo scene positions its own counter.
+    private void ApplyHandPanelLayout()
+    {
+        if (GetComponent<HandFollowPanel>() == null)
+        {
+            return;
+        }
+
+        titleText.fontSize = 32f;
+
+        if (stepCounterText != null)
+        {
+            stepCounterText.fontSize = 30f;
+
+            RectTransform counter = stepCounterText.rectTransform;
+            counter.anchorMin = new Vector2(0f, 0f);
+            counter.anchorMax = new Vector2(1f, 0f);
+            counter.pivot = new Vector2(0.5f, 1f);
+            counter.anchoredPosition = new Vector2(0f, -6f);
+            counter.sizeDelta = new Vector2(-40f, 50f);
+        }
+    }
+
+    // Shrinks long step text so it stays inside its button. Only for hand-attached panels (XR-Setup).
+    private void FitLabelInButton(TMP_Text label)
+    {
+        if (GetComponent<HandFollowPanel>() == null)
+        {
+            return;
+        }
+
+        label.enableAutoSizing = true;
+        label.fontSizeMin = 14f;
+        label.fontSizeMax = 26f;
     }
 
     // Puts a button on the list, sets its text, and makes pressing it call OnStepButtonPressed.
@@ -182,7 +221,9 @@ public class ProceduresPanel : MonoBehaviour
                 : Color.white
         );
 
-        button.GetComponentInChildren<TMP_Text>().text = text;
+        TMP_Text label = button.GetComponentInChildren<TMP_Text>();
+        label.text = text;
+        FitLabelInButton(label);
         button.onClick.AddListener(() => OnStepButtonPressed(stepNumber));
     }
 

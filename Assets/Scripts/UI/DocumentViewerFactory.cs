@@ -118,8 +118,8 @@ public static class DocumentViewerFactory
                 viewerFollow = root.gameObject.AddComponent<HandFollowPanel>();
             viewerFollow.CopySettingsFrom(sourceFollow);
 
-            // Sit to the right of the menu: one panel width, plus a small gap.
-            viewerFollow.sideOffset = root.rect.width * root.lossyScale.x + ViewerGapMeters;
+            // Sit to the left of the menu (easier to reach): one panel width, plus a small gap.
+            viewerFollow.sideOffset = -(root.rect.width * root.lossyScale.x + ViewerGapMeters);
         }
         else if (viewerFollow != null)
             viewerFollow.enabled = false;

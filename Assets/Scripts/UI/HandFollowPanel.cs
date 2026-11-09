@@ -28,7 +28,7 @@ public class HandFollowPanel : MonoBehaviour
     // How far above the hand the panel floats, in meters (0.12 = 12 cm).
     public float heightAboveHand = 0.12f;
 
-    // How far to the user's right the panel sits, in meters. Document viewers use this to sit beside the menu.
+    // How far to the user's right the panel sits, in meters (negative = left). Document viewers use this to sit beside the menu.
     public float sideOffset = 0f;
 
     // How quickly the panel catches up to the hand. Higher = snappier, lower = floatier.
@@ -38,6 +38,13 @@ public class HandFollowPanel : MonoBehaviour
 
     // Hide the panel while its hand is not tracked (e.g. hand out of view, or hand behind your back).
     public bool hideWhenHandLost = true;
+
+    // How many seconds the hand must stay lost before the panel hides.
+    // Hands that overlap or come close can briefly lose tracking, and the panel should not blink out when that happens.
+    public float hideDelay = 1.5f;
+
+    // How long the hand has been lost so far, in seconds.
+    private float handLostTime = 0f;
 
     // The panel's Canvas - turned off to hide the panel without turning off this script.
     private Canvas panelCanvas;
@@ -52,11 +59,48 @@ public class HandFollowPanel : MonoBehaviour
     // False until the hand has been tracked once. Keeps the panel visible in the Editor without a headset.
     private bool hasSeenHand = false;
 
+    // True while the user is dragging this panel, or after they let go of it. The panel stops following the hand.
+    private bool isPlacedByUser = false;
+
     // Runs every time the panel is shown again (e.g. after a document viewer closes).
     // Makes the next frame jump straight into place instead of sliding over from the old spot.
     void OnEnable()
     {
         hasStarted = false;
+        isPlacedByUser = false;
+        handLostTime = 0f;
+    }
+
+    // Called when the user grabs the panel: stop following the hand so the grab can move it freely.
+    public void BeginDrag()
+    {
+        isPlacedByUser = true;
+
+        // Detach from the hand anchor, so moving that hand no longer moves the panel.
+        // DocumentViewerFactory attaches it again the next time the viewer opens.
+        transform.SetParent(null, true);
+
+        // The panel may be hidden if its hand was just lost.
+        if (panelCanvas != null)
+        {
+            panelCanvas.enabled = true;
+        }
+    }
+
+    // Turns the panel to face the user and keeps it upright. Used while the panel is being dragged.
+    public void FaceHead()
+    {
+        if (head == null)
+        {
+            return;
+        }
+
+        Vector3 awayFromHead = transform.position - head.position;
+        awayFromHead.y = 0f;
+        if (awayFromHead.sqrMagnitude > 0.0001f)
+        {
+            transform.rotation = Quaternion.LookRotation(awayFromHead, Vector3.up);
+        }
     }
 
     void Start()
@@ -82,12 +126,35 @@ public class HandFollowPanel : MonoBehaviour
     // LateUpdate runs after the hands have been moved for this frame, so the panel never lags a frame behind.
     void LateUpdate()
     {
+        if (isPlacedByUser)
+        {
+            return;
+        }
+
         if (hand == null || head == null)
         {
             return;
         }
 
+        bool handTracked = IsHandTracked();
+        if (handTracked)
+        {
+            hasSeenHand = true;
+            handLostTime = 0f;
+        }
+        else if (hasSeenHand)
+        {
+            handLostTime += Time.deltaTime;
+        }
+
         UpdateVisibility();
+
+        // While the hand is lost its position can't be trusted, so hold the panel where it was.
+        if (hasStarted && hasSeenHand && !handTracked)
+        {
+            transform.SetPositionAndRotation(currentPosition, currentRotation);
+            return;
+        }
 
         // Target position: the hand's position, keeps panel upright
         Vector3 targetPosition = hand.position + Vector3.up * heightAboveHand;
@@ -133,6 +200,7 @@ public class HandFollowPanel : MonoBehaviour
         heightAboveHand = source.heightAboveHand;
         followSpeed = source.followSpeed;
         hideWhenHandLost = source.hideWhenHandLost;
+        hideDelay = source.hideDelay;
         enabled = source.enabled;
     }
 
@@ -144,14 +212,8 @@ public class HandFollowPanel : MonoBehaviour
             return;
         }
 
-        bool handTracked = IsHandTracked();
-        if (handTracked)
-        {
-            hasSeenHand = true;
-        }
-
         // Only start hiding once the hand has been seen, so the panel still shows in the Editor without a headset.
-        bool shouldShow = handTracked || !hasSeenHand;
+        bool shouldShow = !hasSeenHand || handLostTime < hideDelay;
         if (panelCanvas.enabled != shouldShow)
         {
             panelCanvas.enabled = shouldShow;
